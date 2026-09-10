@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin
+Disallow: /forms/
+Sitemap: https://gmc-thrissur-charity.shivaay251202.chatgpt.site/sitemap.xml
