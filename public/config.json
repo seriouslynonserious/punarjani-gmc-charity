@@ -1,0 +1,13 @@
+{
+  "apiUrl": "/api/index",
+  "googleClientId": "",
+  "turnstileSiteKey": "",
+  "contactEmail": "",
+  "contactPhone": "",
+  "instagramUrl": "",
+  "facebookUrl": "",
+  "whatsappUrl": "",
+  "sheetUrl": "",
+  "authMode": "sites",
+  "spamMode": "proof-of-work"
+}
