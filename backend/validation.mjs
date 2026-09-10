@@ -1,0 +1,13 @@
+export const STATUSES=['Pending','Contacted','Approved','Completed','Rejected','Active','Inactive','Interested','New'];
+export function safeCell(value){const s=String(value??'').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').trim();return /^[\s]*[=+@-]/.test(s)?"'"+s:s}
+export function validateSubmission(schema,values){
+ if(!schema||!values||typeof values!=='object'||Array.isArray(values))throw Error('Invalid form.');
+ if(values.website)throw Error('Submission rejected.');
+ if(values.Consent!==true)throw Error('Consent is required.');
+ const out={};
+ for(const f of schema.fields){let raw=values[f.key];if(f.type==='checkbox'){out[f.key]=raw===true;continue}if(raw!==undefined&&raw!==null&&typeof raw!=='string'&&typeof raw!=='number')throw Error('Invalid '+f.label+'.');const s=String(raw??'').trim();if(f.required&&!s)throw Error(f.label+' is required.');if(s.length>(f.type==='textarea'?3000:300))throw Error(f.label+' is too long.');if(s){if(f.type==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s))throw Error('Enter a valid email address.');if(f.type==='tel'&&(!/^\+?[0-9 ()-]{7,20}$/.test(s)||s.replace(/\D/g,'').length<7||s.replace(/\D/g,'').length>15))throw Error('Enter a valid phone number.');if(f.type==='select'&&!f.options.includes(s))throw Error('Invalid '+f.label+'.');if(f.type==='number'){const n=Number(s);if(!Number.isFinite(n)||n<0||n>10000000||(f.key==='Units'&&(!Number.isInteger(n)||n<1||n>100))||(f.key==='Age'&&(!Number.isInteger(n)||n>120)))throw Error('Invalid '+f.label+'.');}if(f.type==='date'&&(!/^\d{4}-\d{2}-\d{2}$/.test(s)||!Number.isFinite(Date.parse(s))||new Date(s).toISOString().slice(0,10)!==s))throw Error('Invalid '+f.label+'.');}out[f.key]=s}
+ if(schema.key==='blood-donor'&&out['Preferred Contact']==='Email'&&!out.Email)throw Error('Add an email address for your preferred contact method.');
+ out.Consent=true;return out;
+}
+export function publicDonor(row){return {name:String(row.Name||'Donor').trim().split(/\s+/)[0],bloodGroup:row['Blood Group'],city:row.City,availability:row.Availability};}
+export function validateUpdate(tab,changes){if(!changes||typeof changes!=='object')throw Error('Invalid update.');if(tab==='Impact_Statistics'){const value=Number(changes.Value);if(!Number.isSafeInteger(value)||value<0)throw Error('Impact must be a non-negative whole number.');return {Value:value,Published:changes.Published===true||changes.Published==='TRUE'?'TRUE':'FALSE'}}if(!STATUSES.includes(changes.Status))throw Error('Invalid status.');if(typeof changes['Admin Notes']!=='string'||changes['Admin Notes'].length>3000)throw Error('Invalid notes.');return {Status:changes.Status,'Admin Notes':safeCell(changes['Admin Notes'])}}
